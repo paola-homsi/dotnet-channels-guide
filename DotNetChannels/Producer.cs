@@ -1,25 +1,37 @@
-﻿using System.Threading.Tasks;
+using System;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace ChannelsDemo
 {
-    public class Producer
+    public sealed class Producer
     {
-        private ChannelWriter<string> _writer;
-        public Producer(ChannelWriter<string> writer)
-        {
-            _writer = writer;
-        }
+        private readonly ChannelWriter<string> _writer;
 
-        public async Task Start(int count)
+        public Producer(ChannelWriter<string> writer) => _writer = writer;
+
+        public async Task StartAsync(int count, TimeSpan? delay = null)
         {
-            for (int i = 0; i < count; i++)
+            try
             {
-                await Task.Delay(100);
-                while (await _writer.WaitToWriteAsync().ConfigureAwait(false))
-                    if (_writer.TryWrite(i.ToString()))
-                        break; 
-                
+                for (int i = 0; i < count; i++)
+                {
+                    if (delay is { } d)
+                    {
+                        await Task.Delay(d);
+                    }
+
+                    // Waits while a bounded channel is full.
+                    await _writer.WriteAsync(i.ToString());
+                }
+
+                _writer.Complete();
+            }
+            catch (Exception ex)
+            {
+                // Pass the failure on so the consumer does not wait forever.
+                _writer.Complete(ex);
+                throw;
             }
         }
     }

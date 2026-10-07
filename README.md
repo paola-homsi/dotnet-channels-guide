@@ -1,6 +1,6 @@
 # dotnet-channels-guide
 
-[![build](https://github.com/paola-homsi/dotnet-channels-guide/actions/workflows/build.yml/badge.svg)](https://github.com/paola-homsi/dotnet-channels-guide/actions/workflows/build.yml)
+[![build](https://github.com/pawla-homsi/dotnet-channels-guide/actions/workflows/build.yml/badge.svg)](https://github.com/pawla-homsi/dotnet-channels-guide/actions/workflows/build.yml)
 
 A practical guide to `System.Threading.Channels` in .NET, with a working producer/consumer demo.
 
@@ -15,7 +15,7 @@ An in-process channel solved it: the request handler writes to a channel and ret
 Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
 ```bash
-git clone https://github.com/paola-homsi/dotnet-channels-guide.git
+git clone https://github.com/pawla-homsi/dotnet-channels-guide.git
 cd dotnet-channels-guide
 dotnet run --project DotNetChannels
 ```
@@ -48,7 +48,7 @@ C#, .NET 10, `System.Threading.Channels`.
 
 ## Related
 
-[dotnet-channels-benchmarks](https://github.com/paola-homsi/dotnet-channels-benchmarks): throughput and allocation measurements.
+[dotnet-channels-benchmarks](https://github.com/pawla-homsi/dotnet-channels-benchmarks): throughput and allocation measurements.
 
 ## License
 

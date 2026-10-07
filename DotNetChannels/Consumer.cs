@@ -1,27 +1,27 @@
-﻿using System;
-using System.Threading.Tasks;
+using System;
+using System.Threading;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace ChannelsDemo
 {
-    public class Consumer
+    public sealed class Consumer
     {
-        ChannelReader<string> _reader;
-        public Consumer(ChannelReader<string> reader)
-        {
-            _reader = reader;
-        }
+        private readonly ChannelReader<string> _reader;
 
-        public async Task Consume()
+        public Consumer(ChannelReader<string> reader) => _reader = reader;
+
+        /// <summary>Reads until the writer completes the channel. Returns the number of items read.</summary>
+        public async Task<int> ConsumeAsync(CancellationToken cancellationToken = default)
         {
-            while (await _reader.WaitToReadAsync())
+            int count = 0;
+            await foreach (string msg in _reader.ReadAllAsync(cancellationToken))
             {
-                if (_reader.TryRead(out var msg))
-                {
-                    Console.WriteLine(msg);
-                }
+                Console.WriteLine(msg);
+                count++;
             }
 
+            return count;
         }
     }
 }

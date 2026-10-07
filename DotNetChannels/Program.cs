@@ -1,28 +1,37 @@
-﻿using System;
-using System.Threading.Tasks;
+using System;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace ChannelsDemo
 {
-    class Program
+    internal static class Program
     {
-        private static Channel<string> channel;
-        private const int TOTAL_ITEMS = 1000;
-        private const int CHANNEL_CAPACITY = 1000;
-        static async Task Main(string[] args)
+        private const int TotalItems = 1000;
+        private const int ChannelCapacity = 100;
+
+        private static async Task Main()
         {
-            channel = Channel.CreateBounded<string>(CHANNEL_CAPACITY);
+            // Bounded: when the consumer falls behind, the producer waits
+            // instead of growing memory without limit.
+            var channel = Channel.CreateBounded<string>(new BoundedChannelOptions(ChannelCapacity)
+            {
+                SingleReader = true,
+                SingleWriter = true,
+                FullMode = BoundedChannelFullMode.Wait,
+            });
 
-            Producer producer = new Producer(channel.Writer);
-            Consumer consumer = new Consumer(channel.Reader);
+            var producer = new Producer(channel.Writer);
+            var consumer = new Consumer(channel.Reader);
 
-            producer.Start(TOTAL_ITEMS).ConfigureAwait(false);
-            await consumer.Consume().ConfigureAwait(false);
+            // Start both, then wait for both. The producer completes the writer
+            // when it is done, which is what lets the consumer's loop end.
+            Task producing = producer.StartAsync(TotalItems);
+            Task<int> consuming = consumer.ConsumeAsync();
 
-            channel.Writer.TryComplete();
-            Console.WriteLine("Hello World!");
+            await producing;
+            int consumed = await consuming;
 
-            Console.ReadLine();
+            Console.WriteLine($"Produced {TotalItems}, consumed {consumed}.");
         }
     }
 }
